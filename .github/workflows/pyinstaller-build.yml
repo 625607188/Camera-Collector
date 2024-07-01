@@ -24,7 +24,7 @@ jobs:
 
     - name: Build executable
       run: |
-        python -m pyinstaller -F --name=Camera-Collector pyinstaller-build.spec
+        pyinstaller -F --name=Camera-Collector pyinstaller-build.spec
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
