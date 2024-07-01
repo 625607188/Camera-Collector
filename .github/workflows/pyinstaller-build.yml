@@ -22,12 +22,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Clean pyinstaller build folder
+      run: |
+        rm -rf build
+        rm -rf dist
+
     - name: Build executable
       run: |
-        pyinstaller -F --name=Camera-Collector pyinstaller-build.spec
+        pyinstaller pyinstaller-build.spec
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: myapp-executable # 工件名称
+        name: Camera-Collector
         path: dist/Camera-Collector.exe
