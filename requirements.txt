@@ -1,0 +1,12 @@
+pyinstaller==6.6.0
+pyinstaller-hooks-contrib==2024.4
+PyQt6==6.4.2
+pyqt6-plugins==6.4.2.2.3
+PyQt6-QScintilla==2.14.0
+PyQt6-Qt6==6.4.3
+PyQt6-sip==13.6.0
+pyqt6-tools==6.4.2.3.3
+pyserial==3.5
+pywin32-ctypes==0.2.2
+qt6-applications==6.4.3.2.3
+qt6-tools==6.4.3.1.3
