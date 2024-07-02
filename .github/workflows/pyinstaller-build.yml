@@ -28,12 +28,12 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Camera-Collector.exe
-        path: dist/Camera-Collector.exe
+        path: dist/windows/Camera-Collector.exe
 
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: dist/Camera-Collector.exe
+        artifacts: dist/windows/Camera-Collector.exe
         token: ${{ secrets.GITHUB_TOKEN }}
 
