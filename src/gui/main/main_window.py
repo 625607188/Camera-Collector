@@ -1,11 +1,8 @@
 import os
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QFileDialog
-from PyQt6.QtGui import QCloseEvent, QPixmap, QPainter, QColor, QImage
-from src.common.thread.create_thread import create_and_start_thread
-from src.driver.driver_serial.serial_base import get_serial_list
+from PyQt6.QtGui import QCloseEvent, QPixmap, QColor, QImage
 from src.log import log
-from src.business.management.socket.socket_management import SocketManagement
 from src.business.management.driver_management import DriverManagement
 from src.ui.main_window_ui import Ui_MainWindow
 
@@ -17,7 +14,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     display_socket_picture_signal = pyqtSignal(bytes)
     display_serial_list_signal = pyqtSignal(list)
     display_serial_status_change_signal = pyqtSignal(bool)
-    display_wifi_ssid_signal = pyqtSignal(list)
+    display_wifi_ssid_list_signal = pyqtSignal(list)
+    display_wifi_ssid_signal = pyqtSignal(str)
+    display_wifi_password_signal = pyqtSignal(str)
+    display_wifi_enable_signal = pyqtSignal(bool)
+    display_wifi_connect_status_signal = pyqtSignal(bool)
 
     def __init__(self, parent=None) -> None:
         super(MainWindow, self).__init__(parent)
@@ -39,7 +40,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.display_socket_picture_signal,
             self.display_serial_list_signal,
             self.display_serial_status_change_signal,
+            self.display_wifi_ssid_list_signal,
             self.display_wifi_ssid_signal,
+            self.display_wifi_password_signal,
+            self.display_wifi_enable_signal,
+            self.display_wifi_connect_status_signal,
         )
 
     def init_gui(self) -> None:
@@ -63,7 +68,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.display_socket_search_signal.connect(self.display_socket_search)
         self.display_socket_picture_signal.connect(self.display_socket_picture)
         self.display_serial_list_signal.connect(self.display_serial_list)
+        self.display_wifi_ssid_list_signal.connect(self.display_wifi_ssid_list)
         self.display_wifi_ssid_signal.connect(self.display_wifi_ssid)
+        self.display_wifi_password_signal.connect(self.display_wifi_password)
+        self.display_wifi_enable_signal.connect(self.display_wifi_enable)
+        self.display_wifi_connect_status_signal.connect(
+            self.display_wifi_connect_status
+        )
 
     def display_warning(self, warning) -> None:
         self.logger.warning(warning)
@@ -183,7 +194,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.pushButton_connectWiFi.setEnabled(False)
             self.pushButton_disconnectWiFi.setEnabled(False)
 
-    def display_wifi_ssid(self, ssid) -> None:
+    def display_wifi_ssid_list(self, ssid) -> None:
         currentText = self.comboBox_ssid.currentText()
 
         self.comboBox_ssid.clear()
@@ -192,3 +203,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBox_ssid.setCurrentText(currentText)
         else:
             self.comboBox_ssid.setCurrentIndex(-1)
+
+    def display_wifi_ssid(self, ssid) -> None:
+        self.lineEdit_ssid.setText(ssid)
+
+    def display_wifi_password(self, password) -> None:
+        self.lineEdit_password.setText(password)
+
+    def display_wifi_enable(self, enable) -> None:
+        if enable:
+            self.pushButton_connectWiFi.setEnabled(False)
+            self.pushButton_disconnectWiFi.setEnabled(True)
+        else:
+            self.pushButton_connectWiFi.setEnabled(False)
+            self.pushButton_disconnectWiFi.setEnabled(True)
+
+    def display_wifi_connect_status(self, status) -> None:
+        if status:
+            self.label_wifiStatus.setText("WiFi已连接")
+        else:
+            self.label_wifiStatus.setText("WiFi未连接")

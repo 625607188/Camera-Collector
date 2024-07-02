@@ -27,7 +27,11 @@ class DriverManagement(QObject):
         display_socket_picture_signal,
         display_serial_list_signal,
         display_serial_status_change_signal,
+        display_wifi_ssid_list_signal,
         display_wifi_ssid_signal,
+        display_wifi_password_signal,
+        display_wifi_enable_signal,
+        display_wifi_connect_status_signal,
     ) -> None:
         super(DriverManagement, self).__init__(parent)
 
@@ -37,7 +41,12 @@ class DriverManagement(QObject):
         self.display_socket_picture_signal = display_socket_picture_signal
         self.display_serial_list_signal = display_serial_list_signal
         self.display_serial_status_change_signal = display_serial_status_change_signal
+        self.display_wifi_ssid_list_signal = display_wifi_ssid_list_signal
         self.display_wifi_ssid_signal = display_wifi_ssid_signal
+        self.display_wifi_password_signal = display_wifi_password_signal
+        self.display_wifi_enable_signal = display_wifi_enable_signal
+        self.display_wifi_connect_status_signal = display_wifi_connect_status_signal
+
         self.logger = log.get_logger()
         self.info = DriverInfo()
 
@@ -71,9 +80,6 @@ class DriverManagement(QObject):
     def display_socket_picture_event(self, image) -> None:
         self.display_socket_picture_signal.emit(image)
 
-    def display_wifi_ssid_event(self, ssid) -> None:
-        self.display_wifi_ssid_signal.emit(ssid)
-
     def start_socket_management_thread(self) -> None:
         self.socketManagement = SocketManagement()
         self.socketManagement.set_callback(
@@ -103,13 +109,28 @@ class DriverManagement(QObject):
     def display_serial_status_change_event(self, status) -> None:
         self.display_serial_status_change_signal.emit(status)
 
+    def display_wifi_ssid_event(self, ssid) -> None:
+        self.display_wifi_ssid_signal.emit(ssid)
+
+    def display_wifi_password_event(self, password) -> None:
+        self.display_wifi_password_signal.emit(password)
+
+    def display_wifi_enbale_event(self, enable) -> None:
+        self.display_wifi_enable_signal.emit(enable)
+
+    def display_wifi_connect_status_event(self, status) -> None:
+        self.display_wifi_connect_status_signal.emit(status)
+
     def start_serial_management_thread(self) -> None:
         self.serialManagement = SerialManagement()
         self.serialManagement.set_callback(
             self.display_warning_event,
             self.display_serial_list_event,
             self.display_serial_status_change_event,
-        )
+            self.display_wifi_ssid_event,
+            self.display_wifi_password_event,
+            self.display_wifi_enbale_event,
+            self.display_wifi_connect_status_event)
 
         self.serialManagementQThread = create_and_start_thread(self.serialManagement)
 
@@ -119,8 +140,11 @@ class DriverManagement(QObject):
     def serial_disconnect(self) -> None:
         self.serialManagement.disconnect()
 
+    def display_wifi_ssid_list_event(self, ssidList) -> None:
+        self.display_wifi_ssid_list_signal.emit(ssidList)
+
     def start_wifi_scanner_thread(self) -> None:
         self.wifiScanner = WifiScanner()
-        self.wifiScanner.set_callback(self.display_wifi_ssid_event)
+        self.wifiScanner.set_callback(self.display_wifi_ssid_list_event)
 
         self.wifiScannerQThread = create_and_start_thread(self.wifiScanner)

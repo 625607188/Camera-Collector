@@ -36,11 +36,22 @@ class SerialManagement(QObject):
         }
 
     def set_callback(
-        self, notify_warning, notify_serial_list, notify_serial_status_change
+        self,
+        notify_warning,
+        notify_serial_list,
+        notify_serial_status_change,
+        notify_wifi_ssid,
+        notify_wifi_password,
+        notify_wifi_enbale,
+        notify_wifi_connect_status,
     ) -> None:
         self.notify_warning_callback = notify_warning
         self.notify_serial_list_callback = notify_serial_list
         self.notify_serial_status_change_callback = notify_serial_status_change
+        self.notify_wifi_ssid_callback = notify_wifi_ssid
+        self.notify_wifi_password_callback = notify_wifi_password
+        self.notify_wifi_enbale_callback = notify_wifi_enbale
+        self.notify_wifi_connect_status_callback = notify_wifi_connect_status
 
     def scan_serial_list(self) -> None:
         serials = {}
@@ -107,30 +118,55 @@ class SerialManagement(QObject):
             pass
 
     def connect_wifi_task(self, ssid, password):
-        self.cameraSerial.set_ssid(ssid)
-        self.cameraSerial.set_password(password)
-        self.cameraSerial.set_wifi_enable(True)
+        try:
+            if self.cameraSerial:
+                self.cameraSerial.set_ssid(ssid)
+                self.cameraSerial.set_password(password)
+                self.cameraSerial.set_wifi_enable(True)
+        except Exception as e:
+            self._handle_exception(e)
 
     def connect_wifi(self, ssid, password):
-        self.cameraSerial.set_wifi_enable(False)
+        try:
+            if self.cameraSerial:
+                self.cameraSerial.set_wifi_enable(False)
 
-        timer = QTimer()
-        timer.timeout.connect(lambda: self.connect_wifi_task(ssid, password))
-        timer.setSingleShot(True)
-        timer.start(1000)
+                timer = QTimer()
+                timer.timeout.connect(lambda: self.connect_wifi_task(ssid, password))
+                timer.setSingleShot(True)
+                timer.start(1000)
+        except Exception as e:
+            self._handle_exception(e)
 
     def disconnect_wifi(self):
-        self.cameraSerial.set_wifi_enable(False)
+        try:
+            if self.cameraSerial:
+                self.cameraSerial.set_wifi_enable(False)
+        except Exception as e:
+            self._handle_exception(e)
 
     def get_ssid(self) -> None:
-        # TODO
-        ssid = self.cameraSerial.get_ssid()
+        try:
+            if self.cameraSerial:
+                self.notify_wifi_ssid_callback(self.cameraSerial.get_ssid())
+        except Exception as e:
+            self._handle_exception(e)
 
     def get_password(self) -> None:
-        pass
+        try:
+            if self.cameraSerial:
+                self.notify_wifi_password_callback(self.cameraSerial.get_password())
+        except Exception as e:
+            self._handle_exception(e)
 
     def get_wifi_status(self) -> None:
-        pass
+        try:
+            if self.cameraSerial:
+                self.notify_wifi_connect_status_callback(
+                    self.cameraSerial.get_wifi_connect_status()
+                )
+        except Exception as e:
+            self._handle_exception(e)
 
     @pyqtSlot(str)
     def handle_message(self, message) -> None:
