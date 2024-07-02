@@ -45,6 +45,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: Camera-Collector.exe
+        artifacts: dist/Camera-Collector.exe
         token: ${{ secrets.GITHUB_TOKEN }}
 
