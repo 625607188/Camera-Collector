@@ -28,11 +28,14 @@ class SocketManagementCommandBase(ManagementCommandBase):
 
 
 class SocketConnectCommand(SocketManagementCommandBase):
-    def __init__(self, uuid: str) -> None:
-        self.uuid = uuid
+    def __init__(self, ip: str, port: int) -> None:
+        self.ip = ip
+        self.port = port
 
     def execute(self, handle) -> None:
-        message = self._build_command(SocketCommand.CONNECT, {"uuid": self.uuid})
+        message = self._build_command(
+            SocketCommand.CONNECT, {"ip": self.ip, "port": self.port}
+        )
         handle(message)
 
 

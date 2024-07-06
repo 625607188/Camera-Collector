@@ -24,16 +24,19 @@ jobs:
         path: .
         spec: pyinstaller-build.spec
 
+    - name: Zip
+      run: zip -r Camera-Collector.zip dist/windows/Camera-Collector.exe
+
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: Camera-Collector.exe
-        path: dist/windows/Camera-Collector.exe
+        name: Camera-Collector.zip
+        path: Camera-Collector.zip
 
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: dist/windows/Camera-Collector.exe
+        artifacts: Camera-Collector.zip
         token: ${{ secrets.GITHUB_TOKEN }}
 

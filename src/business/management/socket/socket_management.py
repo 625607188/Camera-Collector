@@ -49,7 +49,7 @@ class SocketManagement(QObject):
                 call()
 
     @pyqtSlot()
-    def run(self):
+    def run(self) -> None:
         self.control_signal.connect(self.handle_message)
 
         self.searchSocketThread = SearchSocket()
@@ -64,34 +64,27 @@ class SocketManagement(QObject):
 
         self.thread().quit()
 
-    def deleteLater(self):
+    def deleteLater(self) -> None:
         for timer, _ in self.timerList:
             self.killTimer(timer)
         self.timerList.clear()
 
-    def connect(self, uuid) -> None:
-        socketInfo = self.searchSocketThread.find_socket_info(uuid)
-        if socketInfo is None:
-            self.notify_warning_callback("摄像头不存在")
-            return
-
+    def connect(self, ip, port) -> None:
         try:
-            self.cameraSocket = DriverFactory.create(
-                SOCKET_PRODUCT, socketInfo.ip, socketInfo.port
-            )
+            self.cameraSocket = DriverFactory.create(SOCKET_PRODUCT, ip, port)
             if self.cameraSocket is None:
                 self.notify_warning_callback("摄像头连接失败")
                 self.notify_socket_status_change_callback(False)
                 return
 
             self.notify_socket_status_change_callback(True)
-            self.server.set_camera_ip(socketInfo.ip)
+            self.server.set_camera_ip(ip)
 
             self.get_config()
         except Exception as e:
             self._handle_exception(e)
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         try:
             if self.cameraSocket:
                 self.cameraSocket.close()
@@ -101,28 +94,28 @@ class SocketManagement(QObject):
         except Exception as e:
             pass
 
-    def get_config(self):
+    def get_config(self) -> None:
         try:
             config = self.cameraSocket.get_config()
             self.logger.info(f"摄像头配置: {config}")
         except Exception as e:
             self._handle_exception(e)
 
-    def set_config(self, config):
+    def set_config(self, config) -> None:
         try:
             if not self.cameraSocket.set_config(config):
                 self.notify_warning_callback("摄像头配置失败")
         except Exception as e:
             self._handle_exception(e)
 
-    def control(self, control_command):
+    def control(self, control_command) -> None:
         try:
             if not self.cameraSocket.control(control_command):
                 self.notify_warning_callback("摄像头控制失败")
         except Exception as e:
             self._handle_exception(e)
 
-    def upgrade(self, filePath):
+    def upgrade(self, filePath) -> None:
         try:
             with open(filePath, "rb") as f:
                 file = f.read()
@@ -145,13 +138,11 @@ class SocketManagement(QObject):
                 ):
                     handler()
                 elif command in (
-                    SocketCommand.CONNECT.value,
                     SocketCommand.SET_CONFIG.value,
                     SocketCommand.CONTROL.value,
                     SocketCommand.UPGRADE.value,
                 ):
                     args_mapping = {
-                        SocketCommand.CONNECT.value: "uuid",
                         SocketCommand.SET_CONFIG.value: "config",
                         SocketCommand.CONTROL.value: "control",
                         SocketCommand.UPGRADE.value: "filePath",
@@ -159,6 +150,11 @@ class SocketManagement(QObject):
                     arg_key = args_mapping.get(command)
                     if arg_key and arg_key in messageDict:
                         handler(messageDict[arg_key])
+                    else:
+                        self.logger.error(f"命令 '{command}' 缺少必需的参数。")
+                elif command == SocketCommand.CONNECT.value:
+                    if messageDict.get("ip") and messageDict.get("port"):
+                        handler(messageDict["ip"], messageDict["port"])
                     else:
                         self.logger.error(f"命令 '{command}' 缺少必需的参数。")
                 else:
@@ -170,7 +166,7 @@ class SocketManagement(QObject):
         except Exception as e:
             self._handle_exception(e)
 
-    def _handle_exception(self, exception):
+    def _handle_exception(self, exception) -> None:
         self.logger.error(f"发生错误: {exception}")
         if self.cameraSocket:
             self.cameraSocket.close()

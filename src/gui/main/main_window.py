@@ -1,10 +1,28 @@
+import re
 import os
-from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QRegularExpression
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QFileDialog
-from PyQt6.QtGui import QCloseEvent, QPixmap, QColor, QImage
+from PyQt6.QtGui import (
+    QCloseEvent,
+    QPixmap,
+    QColor,
+    QImage,
+    QRegularExpressionValidator,
+)
 from src.log import log
 from src.business.management.driver_management import DriverManagement
 from src.ui.main_window_ui import Ui_MainWindow
+
+
+def is_valid_ipv4(ip):
+    pattern = re.compile(
+        r"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+    )
+    return bool(pattern.match(ip))
+
+
+def is_valid_port(port):
+    return 0 <= int(port) <= 65535
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -12,13 +30,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     display_socket_status_change_signal = pyqtSignal(bool)
     display_socket_search_signal = pyqtSignal(list)
     display_socket_picture_signal = pyqtSignal(bytes)
-    display_serial_list_signal = pyqtSignal(list)
-    display_serial_status_change_signal = pyqtSignal(bool)
-    display_wifi_ssid_list_signal = pyqtSignal(list)
-    display_wifi_ssid_signal = pyqtSignal(str)
-    display_wifi_password_signal = pyqtSignal(str)
-    display_wifi_enable_signal = pyqtSignal(bool)
-    display_wifi_connect_status_signal = pyqtSignal(bool)
 
     def __init__(self, parent=None) -> None:
         super(MainWindow, self).__init__(parent)
@@ -38,13 +49,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.display_socket_status_change_signal,
             self.display_socket_search_signal,
             self.display_socket_picture_signal,
-            self.display_serial_list_signal,
-            self.display_serial_status_change_signal,
-            self.display_wifi_ssid_list_signal,
-            self.display_wifi_ssid_signal,
-            self.display_wifi_password_signal,
-            self.display_wifi_enable_signal,
-            self.display_wifi_connect_status_signal,
         )
 
     def init_gui(self) -> None:
@@ -54,8 +58,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         blank_pixmap.fill(QColor(255, 255, 255))
         self.label_pic.setPixmap(blank_pixmap)
 
-        self.comboBox_baud.addItems(["9600", "19200", "38400", "57600", "115200"])
-        self.comboBox_baud.setCurrentIndex(0)
+        regVal = QRegularExpressionValidator()
+        regVal.setRegularExpression(
+            QRegularExpression(
+                r"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+                r":([0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+            )
+        )
+        self.lineEdit_ipPort.setValidator(regVal)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         del self.driver_management
@@ -65,16 +75,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.display_socket_status_change_signal.connect(
             self.display_socket_status_change
         )
-        self.display_socket_search_signal.connect(self.display_socket_search)
         self.display_socket_picture_signal.connect(self.display_socket_picture)
-        self.display_serial_list_signal.connect(self.display_serial_list)
-        self.display_wifi_ssid_list_signal.connect(self.display_wifi_ssid_list)
-        self.display_wifi_ssid_signal.connect(self.display_wifi_ssid)
-        self.display_wifi_password_signal.connect(self.display_wifi_password)
-        self.display_wifi_enable_signal.connect(self.display_wifi_enable)
-        self.display_wifi_connect_status_signal.connect(
-            self.display_wifi_connect_status
-        )
 
     def display_warning(self, warning) -> None:
         self.logger.warning(warning)
@@ -85,61 +86,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.checkBox_camera.setChecked(status)
 
         if status:
+            self.label_cameraStatus.setText("摄像头已连接")
             self.lineEdit_filePath.setEnabled(True)
             self.pushButton_filePath.setEnabled(True)
         else:
+            self.label_cameraStatus.setText("摄像头未连接")
             self.lineEdit_filePath.setEnabled(False)
             self.pushButton_filePath.setEnabled(False)
             self.pushButton_upgrade.setEnabled(False)
 
-    def display_socket_search(self, result) -> None:
-        currentText = (
-            self.comboBox_camera.currentText()
-            if self.checkBox_camera.isChecked()
-            else ""
-        )
-
-        updatedResult = list(
-            sorted(set(result + ([currentText] if currentText else [])))
-        )
-
-        if updatedResult != self.lastSocketResult:
-            self.lastSocketResult = updatedResult
-
-            self.comboBox_camera.clear()
-            self.comboBox_camera.addItems(updatedResult)
-
-            if self.checkBox_camera.isChecked():
-                self.comboBox_camera.setCurrentText(currentText)
-            else:
-                self.comboBox_camera.setCurrentIndex(-1)
-
     @pyqtSlot()
     def update(self):
-        if self.sender() == self.checkBox_serial:
-            if self.checkBox_serial.isChecked():
-                serial = self.comboBox_serial.currentText()
-                baud = self.comboBox_baud.currentText()
-                if serial and baud:
-                    self.driver_management.serial_connect(serial, baud)
-                else:
-                    self.display_warning("请确认串口参数")
-                    self.checkBox_serial.setChecked(False)
-            else:
-                self.driver_management.serial_disconnect()
-                self.label_wifiStatus.setText("WiFi未连接")
-                self.pushButton_connectWiFi.setEnabled(False)
-                self.pushButton_disconnectWiFi.setEnabled(False)
-
-        elif self.sender() == self.checkBox_camera:
+        if self.sender() == self.checkBox_camera:
             if self.checkBox_camera.isChecked():
-                uuid = self.comboBox_camera.currentText()
-                if uuid == "":
-                    self.display_warning("请选择摄像头")
+                ipAndPort = self.lineEdit_ipPort.text()
+                if ipAndPort == "":
+                    self.display_warning("请确定ip和端口信息")
                     self.checkBox_camera.setChecked(False)
                     return
 
-                self.driver_management.socket_connect(uuid)
+                ip, port = ipAndPort.split(":")
+                # 校验ip和port是否正确
+                if not is_valid_ipv4(ip) or not is_valid_port(port):
+                    self.display_warning("ip和端口信息错误")
+                    self.checkBox_camera.setChecked(False)
+                    return
+
+                self.label_cameraStatus.setText("摄像头连接中")
+                self.driver_management.socket_connect(ip, int(port))
             else:
                 self.driver_management.socket_disconnect()
 
@@ -177,49 +151,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.label_pic.setPixmap(scaled_pixmap)
         else:
             print("Failed to convert image data to QPixmap.")
-
-    def display_serial_list(self, serial_list) -> None:
-        currentText = self.comboBox_serial.currentText()
-
-        self.comboBox_serial.clear()
-        self.comboBox_serial.addItems(serial_list)
-        if currentText in serial_list:
-            self.comboBox_serial.setCurrentText(currentText)
-        else:
-            self.comboBox_serial.setCurrentIndex(-1)
-
-    def display_serial_status_change(self, status) -> None:
-        if not status:
-            self.label_wifiStatus.setText("WiFi未连接")
-            self.pushButton_connectWiFi.setEnabled(False)
-            self.pushButton_disconnectWiFi.setEnabled(False)
-
-    def display_wifi_ssid_list(self, ssid) -> None:
-        currentText = self.comboBox_ssid.currentText()
-
-        self.comboBox_ssid.clear()
-        self.comboBox_ssid.addItems(ssid)
-        if currentText in ssid:
-            self.comboBox_ssid.setCurrentText(currentText)
-        else:
-            self.comboBox_ssid.setCurrentIndex(-1)
-
-    def display_wifi_ssid(self, ssid) -> None:
-        self.lineEdit_ssid.setText(ssid)
-
-    def display_wifi_password(self, password) -> None:
-        self.lineEdit_password.setText(password)
-
-    def display_wifi_enable(self, enable) -> None:
-        if enable:
-            self.pushButton_connectWiFi.setEnabled(False)
-            self.pushButton_disconnectWiFi.setEnabled(True)
-        else:
-            self.pushButton_connectWiFi.setEnabled(False)
-            self.pushButton_disconnectWiFi.setEnabled(True)
-
-    def display_wifi_connect_status(self, status) -> None:
-        if status:
-            self.label_wifiStatus.setText("WiFi已连接")
-        else:
-            self.label_wifiStatus.setText("WiFi未连接")
