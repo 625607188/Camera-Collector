@@ -11,7 +11,7 @@ class CameraServer(QObject):
         super().__init__()
 
         self.logger = log().get_logger()
-        self.ip = "192.168.0.106"
+        self.ip = ""
         self.client_socket = None
 
     def set_callback(self, notify_socket_picture) -> None:
@@ -89,7 +89,16 @@ class CameraServer(QObject):
                                         payload = full_data[
                                             payload_start : payload_start + length
                                         ]
-                                        self.notify_socket_picture_callback(payload)
+                                        image_start = payload.find(b"\r\n\r\n") + 4
+                                        image_end = payload[image_start:-2].rfind(
+                                            b"\r\n"
+                                        )
+
+                                        image = payload[
+                                            image_start : image_start + image_end
+                                        ]
+
+                                        self.notify_socket_picture_callback(image)
                                     else:
                                         self.logger.warning(
                                             "Invalid content length or data size."

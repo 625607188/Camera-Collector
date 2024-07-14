@@ -90,6 +90,7 @@ class SocketManagement(QObject):
                 self.cameraSocket.close()
                 del self.cameraSocket
             self.cameraSocket = None
+            self.server.set_camera_ip("")
             self.notify_socket_status_change_callback(False)
         except Exception as e:
             pass
