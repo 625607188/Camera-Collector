@@ -6,6 +6,8 @@ from src.business.management.socket.socket_management_command import (
     SocketConnectCommand,
     SocketDisconnectCommand,
     SocketUpgradeCommand,
+    SocketGetConfigCommand,
+    SocketSetConfigCommand,
 )
 from src.common.thread.create_thread import create_and_start_thread
 from src.log import log
@@ -21,15 +23,15 @@ class DriverManagement(QObject):
         parent,
         display_warning_signal,
         display_socket_status_change_signal,
-        display_socket_search_signal,
         display_socket_picture_signal,
+        display_socket_config_signal,
     ) -> None:
         super(DriverManagement, self).__init__(parent)
 
         self.display_warning_signal = display_warning_signal
         self.display_socket_status_change_signal = display_socket_status_change_signal
-        self.display_socket_search_signal = display_socket_search_signal
         self.display_socket_picture_signal = display_socket_picture_signal
+        self.display_socket_config_signal = display_socket_config_signal
 
         self.logger = log.get_logger()
         self.info = DriverInfo()
@@ -54,19 +56,19 @@ class DriverManagement(QObject):
     def display_socket_status_change_event(self, status) -> None:
         self.display_socket_status_change_signal.emit(status)
 
-    def display_socket_search_event(self, result) -> None:
-        self.display_socket_search_signal.emit(result)
-
     def display_socket_picture_event(self, image) -> None:
         self.display_socket_picture_signal.emit(image)
+
+    def display_socket_config_event(self, config) -> None:
+        self.display_socket_config_signal.emit(config)
 
     def start_socket_management_thread(self) -> None:
         self.socketManagement = SocketManagement()
         self.socketManagement.set_callback(
             self.display_warning_event,
             self.display_socket_status_change_event,
-            self.display_socket_search_event,
             self.display_socket_picture_event,
+            self.display_socket_config_event,
         )
 
         self.socketManagementQThread = create_and_start_thread(self.socketManagement)
@@ -81,4 +83,12 @@ class DriverManagement(QObject):
 
     def socket_upgrade(self, filePath) -> None:
         invoker = SocketUpgradeCommand(filePath)
+        invoker.execute(self.handle_message)
+
+    def socket_get_config(self) -> None:
+        invoker = SocketGetConfigCommand()
+        invoker.execute(self.handle_message)
+
+    def socket_set_config(self, config) -> None:
+        invoker = SocketSetConfigCommand(config)
         invoker.execute(self.handle_message)

@@ -1,3 +1,4 @@
+import json
 import re
 import os
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QRegularExpression
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     display_socket_status_change_signal = pyqtSignal(bool)
     display_socket_search_signal = pyqtSignal(list)
     display_socket_picture_signal = pyqtSignal(bytes)
+    display_socket_config_signal = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         super(MainWindow, self).__init__(parent)
@@ -47,8 +49,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self,
             self.display_warning_signal,
             self.display_socket_status_change_signal,
-            self.display_socket_search_signal,
             self.display_socket_picture_signal,
+            self.display_socket_config_signal,
         )
 
     def init_gui(self) -> None:
@@ -76,6 +78,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.display_socket_status_change
         )
         self.display_socket_picture_signal.connect(self.display_socket_picture)
+        self.display_socket_config_signal.connect(self.display_socket_config)
 
     def display_warning(self, warning) -> None:
         self.logger.warning(warning)
@@ -95,8 +98,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.pushButton_filePath.setEnabled(False)
             self.pushButton_upgrade.setEnabled(False)
 
+    def _is_valid_json(self, json_str) -> bool:
+        try:
+            json.loads(json_str)
+        except json.JSONDecodeError:
+            return False
+        return True
+
     @pyqtSlot()
-    def update(self):
+    def update(self) -> None:
         if self.sender() == self.checkBox_camera:
             if self.checkBox_camera.isChecked():
                 ipAndPort = self.lineEdit_ipPort.text()
@@ -124,7 +134,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.pushButton_upgrade.setEnabled(False)
 
         elif self.sender() == self.pushButton_filePath:
-            print("pushButton_filePath")
             filePath = QFileDialog.getOpenFileName(
                 self, "选择固件", "", "All Files (*)"
             )
@@ -137,6 +146,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.driver_management.socket_upgrade(filePath)
             else:
                 self.display_warning_signal.emit("固件路径错误")
+
+        elif self.sender() == self.pushButton_refreshConfig:
+            self.driver_management.socket_get_config()
+
+        elif self.sender() == self.pushButton_config:
+            config = self.textBrowser_config.toPlainText()
+            if not self._is_valid_json(config):
+                self.display_warning_signal.emit("配置了非法的json字符串")
+                return
+
+            self.driver_management.socket_set_config(
+                json.dumps(json.loads(config), separators=(",", ":"))
+            )
 
     def display_socket_picture(self, image) -> None:
         qimage = QImage()
@@ -151,3 +173,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.label_pic.setPixmap(scaled_pixmap)
         else:
             print("Failed to convert image data to QPixmap.")
+
+    def display_socket_config(self, config):
+        self.textBrowser_config.setText(json.dumps(json.loads(config), indent=4))

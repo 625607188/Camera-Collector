@@ -29,9 +29,9 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <widget class="QLabel" name="label_pic">
         <property name="minimumSize">
@@ -49,7 +49,47 @@
        </widget>
       </item>
       <item>
-       <widget class="QTextBrowser" name="textBrowser"/>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>配置</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QTextBrowser" name="textBrowser_config"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_refreshConfig">
+             <property name="text">
+              <string>刷新</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_config">
+             <property name="text">
+              <string>配置</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
      </layout>
     </item>
@@ -181,8 +221,8 @@
    <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>928</x>
-     <y>56</y>
+     <x>929</x>
+     <y>55</y>
     </hint>
     <hint type="destinationlabel">
      <x>942</x>
@@ -235,6 +275,38 @@
     <hint type="destinationlabel">
      <x>845</x>
      <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_refreshConfig</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>517</x>
+     <y>638</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>517</x>
+     <y>666</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_config</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>640</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>609</x>
+     <y>667</y>
     </hint>
    </hints>
   </connection>

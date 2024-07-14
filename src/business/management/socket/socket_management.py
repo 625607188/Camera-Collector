@@ -6,7 +6,6 @@ from src.driver.driver_socket.camera_socket.camera_socket import CameraSocket
 from src.log import log
 from src.driver.driver_factory import SOCKET_PRODUCT, DriverFactory
 from src.business.management.socket.socket_management_command import SocketCommand
-from src.business.management.socket.socket_search import SearchSocket
 from src.driver.driver_socket.camera_socket.camera_server import CameraServer
 
 
@@ -35,13 +34,13 @@ class SocketManagement(QObject):
         self,
         notify_warning,
         notify_status_change,
-        notify_socket_search,
         notify_socket_picture,
+        notify_socket_config,
     ) -> None:
         self.notify_warning_callback = notify_warning
         self.notify_socket_status_change_callback = notify_status_change
-        self.notify_socket_search_callback = notify_socket_search
         self.notify_socket_picture_callback = notify_socket_picture
+        self.notify_socket_config_callback = notify_socket_config
 
     def timerEvent(self, event):
         for timer, call in self.timerList:
@@ -51,10 +50,6 @@ class SocketManagement(QObject):
     @pyqtSlot()
     def run(self) -> None:
         self.control_signal.connect(self.handle_message)
-
-        self.searchSocketThread = SearchSocket()
-        self.searchSocketThread.set_callback(self.notify_socket_search_callback)
-        self.searchSocketQThread = create_and_start_thread(self.searchSocketThread)
 
         self.server = CameraServer()
         self.server.set_callback(self.notify_socket_picture_callback)
@@ -99,6 +94,7 @@ class SocketManagement(QObject):
         try:
             config = self.cameraSocket.get_config()
             self.logger.info(f"摄像头配置: {config}")
+            self.notify_socket_config_callback(config)
         except Exception as e:
             self._handle_exception(e)
 
