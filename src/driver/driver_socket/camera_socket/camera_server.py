@@ -50,13 +50,13 @@ class CameraServer(QObject):
 
     def client(self, sock):
         try:
-            sock.settimeout(0.5)
+            sock.settimeout(0.1)
 
             full_data = b""
             while True:
                 try:
-                    chunk = sock.recv(102400)
-                    if not chunk:
+                    chunk = sock.recv(40960)
+                    if len(chunk) == 0:
                         break
                     full_data += chunk
                 except socket.timeout:
@@ -101,7 +101,7 @@ class CameraServer(QObject):
                                         self.notify_socket_picture_callback(image)
                                     else:
                                         self.logger.warning(
-                                            "Invalid content length or data size."
+                                            f"Invalid content length or data size, data {len(full_data)}, head: {len(head)}, length: {length}."
                                         )
                                 except ValueError:
                                     self.logger.error("Failed to parse Content-Length.")

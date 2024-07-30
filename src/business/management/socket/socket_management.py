@@ -93,6 +93,11 @@ class SocketManagement(QObject):
     def get_config(self) -> None:
         try:
             config = self.cameraSocket.get_config()
+
+            if config == "":
+                self.notify_warning_callback("摄像头配置获取失败")
+                return
+
             self.logger.info(f"摄像头配置: {config}")
             self.notify_socket_config_callback(config)
         except Exception as e:
