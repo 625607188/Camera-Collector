@@ -29,9 +29,9 @@ def is_valid_port(port):
 class MainWindow(QMainWindow, Ui_MainWindow):
     display_warning_signal = pyqtSignal(str)
     display_socket_status_change_signal = pyqtSignal(bool)
-    display_socket_search_signal = pyqtSignal(list)
     display_socket_picture_signal = pyqtSignal(bytes)
     display_socket_config_signal = pyqtSignal(str)
+    display_socket_search_signal = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         super(MainWindow, self).__init__(parent)
@@ -51,6 +51,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.display_socket_status_change_signal,
             self.display_socket_picture_signal,
             self.display_socket_config_signal,
+            self.display_socket_search_signal,
         )
 
     def init_gui(self) -> None:
@@ -79,6 +80,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.display_socket_picture_signal.connect(self.display_socket_picture)
         self.display_socket_config_signal.connect(self.display_socket_config)
+        self.display_socket_search_signal.connect(self.display_socket_search)
 
     def display_warning(self, warning) -> None:
         self.logger.warning(warning)
@@ -160,6 +162,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 json.dumps(json.loads(config), separators=(",", ":"))
             )
 
+        elif self.sender() == self.pushButton_copy:
+            self.lineEdit_ipPort.setText(self.lineEdit_search.text())
+
     def display_socket_picture(self, image) -> None:
         qimage = QImage()
         if qimage.loadFromData(image):
@@ -176,3 +181,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def display_socket_config(self, config):
         self.textBrowser_config.setText(json.dumps(json.loads(config), indent=4))
+
+    def display_socket_search(self, result):
+        self.lineEdit_search.setText(result)
+        if result:
+            self.pushButton_copy.setEnabled(True)
+        else:
+            self.pushButton_copy.setEnabled(False)

@@ -10,6 +10,7 @@ from src.business.management.socket.socket_management_command import (
     SocketSetConfigCommand,
 )
 from src.common.thread.create_thread import create_and_start_thread
+from src.driver.driver_socket.camera_socket.camera_search import SearchSocket
 from src.log import log
 from src.business.management.socket.socket_management import SocketManagement
 
@@ -24,6 +25,7 @@ class DriverManagement(QObject):
         display_socket_status_change_signal,
         display_socket_picture_signal,
         display_socket_config_signal,
+        display_socket_search_signal,
     ) -> None:
         super(DriverManagement, self).__init__(parent)
 
@@ -31,10 +33,12 @@ class DriverManagement(QObject):
         self.display_socket_status_change_signal = display_socket_status_change_signal
         self.display_socket_picture_signal = display_socket_picture_signal
         self.display_socket_config_signal = display_socket_config_signal
+        self.display_socket_search_signal = display_socket_search_signal
 
         self.logger = log.get_logger()
 
         self.start_socket_management_thread()
+        self.start_socket_search_thread()
 
     def deleteLater(self):
         self.socketManagementQThread.quit()
@@ -59,6 +63,9 @@ class DriverManagement(QObject):
 
     def display_socket_config_event(self, config) -> None:
         self.display_socket_config_signal.emit(config)
+
+    def display_socket_search_event(self, result) -> None:
+        self.display_socket_search_signal.emit(result)
 
     def start_socket_management_thread(self) -> None:
         self.socketManagement = SocketManagement()
@@ -90,3 +97,9 @@ class DriverManagement(QObject):
     def socket_set_config(self, config) -> None:
         invoker = SocketSetConfigCommand(config)
         invoker.execute(self.handle_message)
+
+    def start_socket_search_thread(self):
+        self.socketSearch = SearchSocket()
+        self.socketSearch.set_callback(self.display_socket_search_event)
+
+        self.socketSearchQThread = create_and_start_thread(self.socketSearch)

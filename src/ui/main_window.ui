@@ -29,7 +29,7 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_3">
+   <layout class="QHBoxLayout" name="horizontalLayout_4">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
@@ -101,6 +101,46 @@
          <string>WiFi</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="minimumSize">
+              <size>
+               <width>48</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>组播：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEdit_search">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_copy">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>47</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>复制</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
@@ -222,7 +262,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>929</x>
-     <y>55</y>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel">
      <x>942</x>
@@ -238,7 +278,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>796</x>
-     <y>117</y>
+     <y>168</y>
     </hint>
     <hint type="destinationlabel">
      <x>735</x>
@@ -253,8 +293,8 @@
    <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>928</x>
-     <y>117</y>
+     <x>929</x>
+     <y>168</y>
     </hint>
     <hint type="destinationlabel">
      <x>876</x>
@@ -269,8 +309,8 @@
    <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>928</x>
-     <y>86</y>
+     <x>929</x>
+     <y>137</y>
     </hint>
     <hint type="destinationlabel">
      <x>845</x>
@@ -307,6 +347,22 @@
     <hint type="destinationlabel">
      <x>609</x>
      <y>667</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_copy</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>897</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>890</x>
+     <y>254</y>
     </hint>
    </hints>
   </connection>
