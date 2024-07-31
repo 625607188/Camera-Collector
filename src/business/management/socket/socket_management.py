@@ -1,8 +1,6 @@
-from typing import Optional
 import json
 from PyQt6.QtCore import Qt, QThread, QObject, pyqtSignal, pyqtSlot
 from src.common.thread.create_thread import create_and_start_thread
-from src.driver.driver_socket.camera_socket.camera_socket import CameraSocket
 from src.log import log
 from src.driver.driver_factory import SOCKET_PRODUCT, DriverFactory
 from src.business.management.socket.socket_management_command import SocketCommand
@@ -17,7 +15,6 @@ class SocketManagement(QObject):
 
         self.logger = log.get_logger()
         self.timerList = []
-        self.robot: Optional[CameraSocket] = None
         self.timer = None
         self.cameraSocket = None
 
@@ -50,6 +47,10 @@ class SocketManagement(QObject):
     @pyqtSlot()
     def run(self) -> None:
         self.control_signal.connect(self.handle_message)
+
+        # 增加Qtimer
+        self.timer_ping = self.startTimer(5000)
+        self.timerList.append((self.timer_ping, self.ping))
 
         self.server = CameraServer()
         self.server.set_callback(self.notify_socket_picture_callback)
@@ -89,6 +90,21 @@ class SocketManagement(QObject):
             self.notify_socket_status_change_callback(False)
         except Exception as e:
             pass
+
+    def ping(self):
+        try:
+            if self.cameraSocket:
+                if self.cameraSocket.ping():
+                    self.logger.debug("摄像头心跳成功")
+                    self.notify_socket_status_change_callback(True)
+                else:
+                    self.cameraSocket.close()
+                    self.cameraSocket = None
+                    self.server.set_camera_ip("")
+                    self.notify_warning_callback("摄像头心跳失败")
+                    self.notify_socket_status_change_callback(False)
+        except Exception as e:
+            self._handle_exception(e)
 
     def get_config(self) -> None:
         try:

@@ -7,7 +7,11 @@ class DriverBase(metaclass=ABCMeta):
         self.logger = log.get_logger()
 
     @abstractmethod
-    def open(self, *args):
+    def config(self, *args):
+        pass
+
+    @abstractmethod
+    def open(self):
         pass
 
     @abstractmethod

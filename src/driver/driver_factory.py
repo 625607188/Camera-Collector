@@ -13,6 +13,6 @@ class DriverFactory:
         else:
             raise ValueError(f"Unsupported product type: {product_type}")
 
-        if product.open(*args):
+        if product.config(*args):
             return product
         return None

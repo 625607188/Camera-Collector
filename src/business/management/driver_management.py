@@ -11,7 +11,6 @@ from src.business.management.socket.socket_management_command import (
 )
 from src.common.thread.create_thread import create_and_start_thread
 from src.log import log
-from src.business.management.driver_info import DriverInfo
 from src.business.management.socket.socket_management import SocketManagement
 
 
@@ -34,7 +33,6 @@ class DriverManagement(QObject):
         self.display_socket_config_signal = display_socket_config_signal
 
         self.logger = log.get_logger()
-        self.info = DriverInfo()
 
         self.start_socket_management_thread()
 

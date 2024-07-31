@@ -9,11 +9,16 @@ class SocketBase(DriverBase):
 
         self.sock = None
 
-    def open(self, ip, port) -> bool:
+    def config(self, ip, port):
+        self.ip = ip
+        self.port = port
+        return True
+
+    def open(self) -> bool:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(1.0)
         try:
-            self.sock.connect((ip, port))
+            self.sock.connect((self.ip, self.port))
             return True
         except Exception as e:
             self.logger.error("socket connect fail, %s", e)

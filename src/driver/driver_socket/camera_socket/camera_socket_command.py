@@ -34,6 +34,8 @@ def build_post_request_stream(url, data) -> str:
         f"{data}"
     )
 
+def ping_camera() -> str:
+    return build_get_request("/camera/ping")
 
 def get_camera_config() -> str:
     return build_get_request("/camera/config")
