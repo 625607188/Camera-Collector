@@ -17,6 +17,7 @@ class SocketManagement(QObject):
         self.timerList = []
         self.timer = None
         self.cameraSocket = None
+        self.pingFailCounter = 0
 
         self.command_handlers = {
             SocketCommand.CONNECT.value: self.connect,
@@ -77,6 +78,7 @@ class SocketManagement(QObject):
             self.server.set_camera_ip(ip)
 
             self.get_config()
+            self.pingFailCounter = 0
         except Exception as e:
             self._handle_exception(e)
 
@@ -95,16 +97,23 @@ class SocketManagement(QObject):
         try:
             if self.cameraSocket:
                 if self.cameraSocket.ping():
+                    self.pingFailCounter = 0
                     self.logger.debug("摄像头心跳成功")
                     self.notify_socket_status_change_callback(True)
                 else:
-                    self.cameraSocket.close()
-                    self.cameraSocket = None
-                    self.server.set_camera_ip("")
-                    self.notify_warning_callback("摄像头心跳失败")
-                    self.notify_socket_status_change_callback(False)
+                    self.pingFailCounter = self.pingFailCounter + 1
+
         except Exception as e:
-            self._handle_exception(e)
+            self.logger.error(f"发生错误: {e}")
+            self.pingFailCounter = self.pingFailCounter + 1
+
+        if self.pingFailCounter >= 4:
+            if self.cameraSocket:
+                self.cameraSocket.close()
+                self.cameraSocket = None
+            self.server.set_camera_ip("")
+            self.notify_warning_callback("摄像头心跳失败")
+            self.notify_socket_status_change_callback(False)
 
     def get_config(self) -> None:
         try:

@@ -55,7 +55,11 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QTextBrowser" name="textBrowser_config"/>
+          <widget class="QTextBrowser" name="textBrowser_config">
+           <property name="readOnly">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">

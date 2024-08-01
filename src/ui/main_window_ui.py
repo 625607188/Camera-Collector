@@ -33,6 +33,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.groupBox)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.textBrowser_config = QtWidgets.QTextBrowser(parent=self.groupBox)
+        self.textBrowser_config.setReadOnly(False)
         self.textBrowser_config.setObjectName("textBrowser_config")
         self.verticalLayout_3.addWidget(self.textBrowser_config)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()

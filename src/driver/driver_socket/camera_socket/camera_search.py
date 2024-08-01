@@ -33,16 +33,9 @@ class SearchSocket(QObject):
     ) -> None:
         self.notify_socket_search_callback = notify_socket_search
 
-    def join_multicast(self) -> None:
+    def join_broadcast(self) -> None:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.sock.bind(("", 5000))
-        self.sock.setsockopt(
-            socket.IPPROTO_IP,
-            socket.IP_ADD_MEMBERSHIP,
-            socket.inet_aton("224.0.0.1") + socket.inet_aton("0.0.0.0"),
-        )
+        self.sock.bind(("0.0.0.0", 11000))
         self.sock.settimeout(0.1)
 
     def remove_duplicates(self, new_socket_info: SocketInfo) -> None:
@@ -93,7 +86,7 @@ class SearchSocket(QObject):
 
     @pyqtSlot()
     def run(self):
-        self.join_multicast()
+        self.join_broadcast()
 
         self.find_socket = self.startTimer(200, Qt.TimerType.PreciseTimer)
         self.timerList.append((self.find_socket, lambda: self.recv_message()))
