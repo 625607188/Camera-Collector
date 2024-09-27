@@ -1,6 +1,9 @@
+from datetime import datetime
 import json
 import re
 import os
+import cv2
+import numpy as np
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QRegularExpression
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QFileDialog
 from PyQt6.QtGui import (
@@ -10,7 +13,7 @@ from PyQt6.QtGui import (
     QImage,
     QRegularExpressionValidator,
 )
-from src.log import log
+from src.log import LogCollector, log
 from src.business.management.driver_management import DriverManagement
 from src.ui.main_window_ui import Ui_MainWindow
 
@@ -26,12 +29,34 @@ def is_valid_port(port):
     return 0 <= int(port) <= 65535
 
 
+def get_blue_channel(image_bytes):
+    img = np.frombuffer(image_bytes, dtype=np.uint8)
+    img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+
+    b, _, _ = cv2.split(img)
+    blue_channel_image = cv2.merge([b, np.zeros_like(b), np.zeros_like(b)])
+
+    _, encoded_img = cv2.imencode(".jpg", blue_channel_image)
+
+    return encoded_img.tobytes()
+
+
+class QtLogCollector(LogCollector):
+    def __init__(self, log_signal):
+        super().__init__()
+        self.log_signal = log_signal
+
+    def emit(self, record):
+        self.log_signal.emit(self.format(record))
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     display_warning_signal = pyqtSignal(str)
     display_socket_status_change_signal = pyqtSignal(bool)
     display_socket_picture_signal = pyqtSignal(bytes)
     display_socket_config_signal = pyqtSignal(str)
     display_socket_search_signal = pyqtSignal(str)
+    log_signal = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         super(MainWindow, self).__init__(parent)
@@ -39,8 +64,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.lastSerialResult = []
         self.lastSocketResult = []
+        self.picBuff = b""
 
+        self.log_signal.connect(self.display_log)
+        self.log_collector = QtLogCollector(self.log_signal)
         self.logger = log.get_logger()
+        self.logger.addHandler(self.log_collector)
         self.init_gui()
 
         self.init_signals()
@@ -87,7 +116,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         QMessageBox.warning(self, "警告", warning)
 
     def display_socket_status_change(self, status) -> None:
-        self.logger.info(status)
         self.checkBox_camera.setChecked(status)
 
         if status:
@@ -159,15 +187,55 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
             self.driver_management.socket_set_config(
-                json.dumps(json.loads(config), separators=(",", ":"))
+                json.dumps(
+                    json.loads(config), ensure_ascii=False, separators=(",", ":")
+                )
             )
 
         elif self.sender() == self.pushButton_copy:
             self.lineEdit_ipPort.setText(self.lineEdit_search.text())
 
+        elif self.sender() == self.pushButton_default:
+            if os.path.exists("default.conf"):
+                with open("default.conf", "r") as f:
+                    config = f.read()
+                    if not self._is_valid_json(config):
+                        self.display_warning_signal.emit(
+                            "默认配置文件存在非法的json字符串"
+                        )
+                        return
+
+                    self.textBrowser_config.setText(
+                        json.dumps(json.loads(config), indent=4)
+                    )
+            else:
+                self.display_warning_signal.emit("默认配置文件不存在")
+                return
+
+        elif self.sender() == self.pushButton_savePic:
+            if not self.picBuff:
+                self.display_warning_signal.emit("未收到图片")
+                return
+
+            if not os.path.exists("images"):
+                os.makedirs("images")
+
+            currentTime = datetime.now().strftime("%Y%m%d_%H%M%S")
+            fileName = f"images\\target_{currentTime}.jpg"
+
+            try:
+                with open(fileName, "wb") as f:
+                    f.write(self.picBuff)
+                self.statusBar().showMessage("图片保存成功")
+            except Exception as e:
+                self.display_warning_signal.emit(f"保存图片失败: {str(e)}")
+
     def display_socket_picture(self, image) -> None:
         qimage = QImage()
+        if self.checkBox_blue.isChecked():
+            image = get_blue_channel(image)
         if qimage.loadFromData(image):
+            self.picBuff = image
             pixmap = QPixmap.fromImage(qimage)
             scaled_pixmap = pixmap.scaled(
                 640,
@@ -188,3 +256,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.pushButton_copy.setEnabled(True)
         else:
             self.pushButton_copy.setEnabled(False)
+
+    def display_log(self, log):
+        self.textBrowser_log.append(log)

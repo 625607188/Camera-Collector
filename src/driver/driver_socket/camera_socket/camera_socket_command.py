@@ -13,13 +13,12 @@ def build_get_request(url) -> str:
 
 
 def build_post_request_json(url, data) -> str:
-    json_data = json.dumps(data)
     return (
         f"POST {url} HTTP/1.1\r\n"
         "Content-Type: application/json\r\n"
-        f"Content-Length: {len(json_data)}\r\n"
+        f"Content-Length: {len(data)}\r\n"
         "\r\n"
-        f"{json_data}\r\n"
+        f"{data}\r\n"
     )
 
 
@@ -34,19 +33,21 @@ def build_post_request_stream(url, data) -> str:
         f"{data}"
     )
 
+
 def ping_camera() -> str:
     return build_get_request("/camera/ping")
+
 
 def get_camera_config() -> str:
     return build_get_request("/camera/config")
 
 
 def set_camera_config(config) -> str:
-    return build_post_request_json("/camera/config", json.dumps(config))
+    return build_post_request_json("/camera/config", config)
 
 
 def control_camera(command) -> str:
-    return build_post_request_json("/camera/control", json.dumps(command))
+    return build_post_request_json("/camera/control", command)
 
 
 def upgrade_camera(file) -> str:

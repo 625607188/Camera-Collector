@@ -29,9 +29,9 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_4">
+   <layout class="QHBoxLayout" name="horizontalLayout_7">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
        <widget class="QLabel" name="label_pic">
         <property name="minimumSize">
@@ -49,20 +49,16 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox">
+       <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
-         <string>配置</string>
+         <string>日志</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QTextBrowser" name="textBrowser_config">
-           <property name="readOnly">
-            <bool>false</bool>
-           </property>
-          </widget>
+          <widget class="QTextBrowser" name="textBrowser_log"/>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <spacer name="horizontalSpacer">
              <property name="orientation">
@@ -77,16 +73,9 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_refreshConfig">
+            <widget class="QPushButton" name="pushButton_clearLog">
              <property name="text">
-              <string>刷新</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_config">
-             <property name="text">
-              <string>配置</string>
+              <string>清空</string>
              </property>
             </widget>
            </item>
@@ -116,7 +105,7 @@
               </size>
              </property>
              <property name="text">
-              <string>组播：</string>
+              <string>广播：</string>
              </property>
             </widget>
            </item>
@@ -234,6 +223,61 @@
            </item>
           </layout>
          </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_savePic">
+           <property name="text">
+            <string>保存图片</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>配置</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QCheckBox" name="checkBox_blue">
+           <property name="text">
+            <string>仅显示蓝色通道</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextBrowser" name="textBrowser_config">
+           <property name="readOnly">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="pushButton_default">
+             <property name="text">
+              <string>默认</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_refreshConfig">
+             <property name="text">
+              <string>刷新</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_config">
+             <property name="text">
+              <string>配置</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
         </layout>
        </widget>
       </item>
@@ -329,8 +373,8 @@
    <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>517</x>
-     <y>638</y>
+     <x>840</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>517</x>
@@ -345,8 +389,8 @@
    <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>609</x>
-     <y>640</y>
+     <x>929</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>609</x>
@@ -367,6 +411,54 @@
     <hint type="destinationlabel">
      <x>890</x>
      <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_default</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>751</x>
+     <y>461</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>690</x>
+     <y>666</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_savePic</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>866</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>859</x>
+     <y>414</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_clearLog</sender>
+   <signal>released()</signal>
+   <receiver>textBrowser_log</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>587</x>
+     <y>633</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>526</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>

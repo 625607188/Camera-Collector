@@ -108,6 +108,7 @@ class SocketManagement(QObject):
             self.pingFailCounter = self.pingFailCounter + 1
 
         if self.pingFailCounter >= 4:
+            self.pingFailCounter = 0
             if self.cameraSocket:
                 self.cameraSocket.close()
                 self.cameraSocket = None
@@ -117,6 +118,10 @@ class SocketManagement(QObject):
 
     def get_config(self) -> None:
         try:
+            if not self.cameraSocket:
+                self.notify_warning_callback("摄像头未连接")
+                return
+
             config = self.cameraSocket.get_config()
 
             if config == "":
@@ -130,6 +135,10 @@ class SocketManagement(QObject):
 
     def set_config(self, config) -> None:
         try:
+            if not self.cameraSocket:
+                self.notify_warning_callback("摄像头未连接")
+                return
+
             if not self.cameraSocket.set_config(config):
                 self.notify_warning_callback("摄像头配置失败")
         except Exception as e:
@@ -137,6 +146,10 @@ class SocketManagement(QObject):
 
     def control(self, control_command) -> None:
         try:
+            if not self.cameraSocket:
+                self.notify_warning_callback("摄像头未连接")
+                return
+
             if not self.cameraSocket.control(control_command):
                 self.notify_warning_callback("摄像头控制失败")
         except Exception as e:
@@ -144,6 +157,10 @@ class SocketManagement(QObject):
 
     def upgrade(self, filePath) -> None:
         try:
+            if not self.cameraSocket:
+                self.notify_warning_callback("摄像头未连接")
+                return
+
             with open(filePath, "rb") as f:
                 file = f.read()
                 if not self.cameraSocket.upgrade(file):

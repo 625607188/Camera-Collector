@@ -1,7 +1,22 @@
+from abc import ABCMeta, abstractmethod
 import logging
 from src.common.designPattern.singleton import SingletonBase
 
 log_path = r"log.txt"
+
+
+class LogCollector(logging.Handler):
+    def __init__(self):
+        super().__init__()
+
+        formatter = logging.Formatter(
+            "%(asctime)s   [%(levelname)s] %(filename)s:%(lineno)s %(message)s"
+        )
+        self.setFormatter(formatter)
+
+    @abstractmethod
+    def emit(self, record):
+        pass
 
 
 # 单例模式
@@ -15,7 +30,7 @@ class log(SingletonBase):
             l.addHandler(filehandle)
             l.addHandler(streamhandle)
             formatter = logging.Formatter(
-                "%(asctime)s:%(levelname)s:%(filename)s:%(lineno)s %(message)s"
+                "%(asctime)s   [%(levelname)s] %(filename)s:%(lineno)s %(message)s"
             )
             filehandle.setFormatter(formatter)
             streamhandle.setFormatter(formatter)
