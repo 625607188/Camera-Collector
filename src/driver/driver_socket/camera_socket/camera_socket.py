@@ -84,3 +84,7 @@ class CameraSocket(SocketBase):
     def upgrade(self, file):
         status, _ = self._send_command(upgrade_camera(file))
         return status
+
+    def restart(self):
+        status, _ = self._send_command(upgrade_camera())
+        return status

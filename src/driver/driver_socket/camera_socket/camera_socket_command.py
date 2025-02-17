@@ -52,3 +52,6 @@ def control_camera(command) -> str:
 
 def upgrade_camera(file) -> str:
     return build_post_request_stream("/camera/upgrade", file)
+
+def upgrade_camera() -> str:
+    return build_get_request("/camera/restart")

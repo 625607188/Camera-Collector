@@ -13,6 +13,7 @@ class SocketCommand(Enum):
     CONTROL = "control"
     UPGRADE = "upgrade"
     PING = "ping"
+    RESTART = "restart"
 
 
 class SocketManagementCommandBase(ManagementCommandBase):
@@ -77,4 +78,9 @@ class SocketUpgradeCommand(SocketManagementCommandBase):
         message = self._build_command(
             SocketCommand.UPGRADE, {"filePath": self.filePath}
         )
+        handle(message)
+
+class SocketRestartCommand(SocketManagementCommandBase):
+    def execute(self, handle) -> None:
+        message = self._build_command(SocketCommand.RESTART)
         handle(message)

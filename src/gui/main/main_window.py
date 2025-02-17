@@ -230,6 +230,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             except Exception as e:
                 self.display_warning_signal.emit(f"保存图片失败: {str(e)}")
 
+        elif self.sender() == self.pushButton_restart:
+            if QMessageBox.StandardButton.Yes == QMessageBox.warning(self, "警告", "请确认需要重启！", QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No):
+                self.driver_management.socket_restart()
+
     def display_socket_picture(self, image) -> None:
         qimage = QImage()
         if self.checkBox_blue.isChecked():

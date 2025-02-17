@@ -8,6 +8,7 @@ from src.business.management.socket.socket_management_command import (
     SocketUpgradeCommand,
     SocketGetConfigCommand,
     SocketSetConfigCommand,
+    SocketRestartCommand,
 )
 from src.common.thread.create_thread import create_and_start_thread
 from src.driver.driver_socket.camera_socket.camera_search import SearchSocket
@@ -96,6 +97,10 @@ class DriverManagement(QObject):
 
     def socket_set_config(self, config) -> None:
         invoker = SocketSetConfigCommand(config)
+        invoker.execute(self.handle_message)
+
+    def socket_restart(self) -> None:
+        invoker = SocketRestartCommand()
         invoker.execute(self.handle_message)
 
     def start_socket_search_thread(self):

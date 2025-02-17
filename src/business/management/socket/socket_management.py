@@ -26,6 +26,7 @@ class SocketManagement(QObject):
             SocketCommand.SET_CONFIG.value: self.set_config,
             SocketCommand.CONTROL.value: self.control,
             SocketCommand.UPGRADE.value: self.upgrade,
+            SocketCommand.RESTART.value: self.restart,
         }
 
     def set_callback(
@@ -168,6 +169,18 @@ class SocketManagement(QObject):
         except Exception as e:
             self._handle_exception(e)
 
+    def restart(self) -> None:
+        try:
+            if not self.cameraSocket:
+                self.notify_warning_callback("摄像头未连接")
+                return
+
+            if not self.cameraSocket.restart():
+                self.notify_warning_callback("摄像头重启失败")
+        except Exception as e:
+            self._handle_exception(e)
+
+
     @pyqtSlot(str)
     def handle_message(self, message) -> None:
         try:
@@ -179,6 +192,7 @@ class SocketManagement(QObject):
                 if command in (
                     SocketCommand.DISCONNECT.value,
                     SocketCommand.GET_CONFIG.value,
+                    SocketCommand.RESTART.value,
                 ):
                     handler()
                 elif command in (

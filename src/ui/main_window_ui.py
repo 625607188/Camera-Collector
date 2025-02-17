@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'c:\Users\Hao-Huawei\Desktop\project\camera\Camera-Collector\src\ui\main_window.ui'
+# Form implementation generated from reading ui file 'c:\Users\Hao\Desktop\project\Camera-Collector\pythonProject\src\ui\main_window.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -12,9 +12,9 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(951, 689)
-        MainWindow.setMinimumSize(QtCore.QSize(951, 689))
-        MainWindow.setMaximumSize(QtCore.QSize(951, 689))
+        MainWindow.resize(1008, 689)
+        MainWindow.setMinimumSize(QtCore.QSize(1008, 689))
+        MainWindow.setMaximumSize(QtCore.QSize(1008, 689))
         MainWindow.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -132,6 +132,9 @@ class Ui_MainWindow(object):
         self.pushButton_config = QtWidgets.QPushButton(parent=self.groupBox)
         self.pushButton_config.setObjectName("pushButton_config")
         self.horizontalLayout_2.addWidget(self.pushButton_config)
+        self.pushButton_restart = QtWidgets.QPushButton(parent=self.groupBox)
+        self.pushButton_restart.setObjectName("pushButton_restart")
+        self.horizontalLayout_2.addWidget(self.pushButton_restart)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addWidget(self.groupBox)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -153,6 +156,7 @@ class Ui_MainWindow(object):
         self.pushButton_default.released.connect(MainWindow.update) # type: ignore
         self.pushButton_savePic.released.connect(MainWindow.update) # type: ignore
         self.pushButton_clearLog.released.connect(self.textBrowser_log.clear) # type: ignore
+        self.pushButton_restart.released.connect(MainWindow.update) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -176,3 +180,4 @@ class Ui_MainWindow(object):
         self.pushButton_default.setText(_translate("MainWindow", "默认"))
         self.pushButton_refreshConfig.setText(_translate("MainWindow", "刷新"))
         self.pushButton_config.setText(_translate("MainWindow", "配置"))
+        self.pushButton_restart.setText(_translate("MainWindow", "重启"))
